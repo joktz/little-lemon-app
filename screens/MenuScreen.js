@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, FlatList } from 'react-native';
+import { View, SafeAreaView, Text, StyleSheet, FlatList } from 'react-native';
 
 // Menu fetching function
 
@@ -27,7 +27,7 @@ const MenuScreen = () => {
     }, []);
 
     return (
-        <View style={styles.container}>
+        <SafeAreaView style={styles.container}>
             <Text style={styles.header}>MENU</Text>
             {
                 response ? (
@@ -45,7 +45,7 @@ const MenuScreen = () => {
                     <Text>We're sorry! The menu isn't loading right now...</Text>
                 )
             }
-        </View>
+        </SafeAreaView>
     )
 };
 
@@ -53,13 +53,13 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         justifyContent: 'center',
-        backgroundColor: '#333333',
+        backgroundColor: '#495E57',
     },
     header: {
         textAlign: 'center',
         fontSize: 24,
         alignItems: 'center',
-        color: 'yellow',
+        color: '#F4CE14',
     },
     menuCard: {
         padding: 16,
@@ -67,7 +67,7 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
     },
     menuText: {
-        color: 'yellow',
+        color: '#F4CE14',
         fontSize: 24,
     }
 })
