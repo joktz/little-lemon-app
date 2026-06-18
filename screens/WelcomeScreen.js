@@ -2,7 +2,6 @@ import * as React from 'react';
 import { View, Text, Image, StyleSheet, Pressable } from 'react-native';
 
 const WelcomeScreen = ({ navigation }) => {
-  // Add welcome screen code here.
   return (
     <View style={styles.container}>
       <Image source={require('../assets/little-lemon-logo.png')} style={styles.image} />
