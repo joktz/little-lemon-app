@@ -13,11 +13,26 @@ const AccountScreen = () => {
     useEffect(() => {
         const loadPreferences = async () => {
             try {
-                const values = await AsyncStorage.multiGet([
+                const keys = [
                     'pushNotifications',
                     'emailNotifications',
                     'smsNotifications',
-                ]);
+                ];
+
+                let values;
+
+                if (AsyncStorage.multiGet) {
+                    values = await AsyncStorage.multiGet(keys);
+                } else {
+                    values = await Promise.all(
+                        keys.map(async (key) => [
+                            key,
+                            await AsyncStorage.getItem(key),
+                        ])
+                    );
+                }
+
+                console.log('Loaded preferences', values);
 
                 values.forEach(([key, value]) => {
                     if (value !== null) {
@@ -37,7 +52,8 @@ const AccountScreen = () => {
                     }
                 });
             } catch (e) {
-                Alert.alert('Error', e.message)
+                Alert.alert('Error', e.message);
+                console.log(`Error: ${e}`);
             }
         }
 
@@ -49,14 +65,44 @@ const AccountScreen = () => {
 
     const updatePreferences = async (userPreferences) => {
         try {
-            const jsonValue = JSON.stringify(userPreferences)
-            await AsyncStorage.multiSet([
+            const pairs = [
                 ['pushNotifications', JSON.stringify(userPreferences.push)],
                 ['emailNotifications', JSON.stringify(userPreferences.marketing)],
                 ['smsNotifications', JSON.stringify(userPreferences.news)],
-            ]);
+            ];
+
+            // Text platform (mobile or web)
+            if (AsyncStorage.multiSet) {
+                await AsyncStorage.multiSet(pairs);
+            } else {
+                await Promise.all(
+                    pairs.map(([key, value]) => AsyncStorage.setItem(key, value))
+                );
+            }
+
+
+            // Debugging
+            let result;
+
+            if (AsyncStorage.multiGet) {
+                result = await AsyncStorage.multiGet([
+                    'pushNotifications',
+                    'emailNotifications',
+                    'smsNotifications',
+                ]);
+            } else {
+                result = await Promise.all(
+                    pairs.map(async ([key]) => [
+                        key,
+                        await AsyncStorage.getItem(key),
+                    ])
+                );
+            }
+
+            console.log(result);
         } catch (e) {
-            Alert.alert(`An error occurred: ${e.message}`)
+            Alert.alert(`An error occurred: ${e.message}`);
+            console.log(`Error: ${e}`);
         }
     }
 
