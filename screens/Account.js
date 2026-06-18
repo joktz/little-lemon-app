@@ -1,13 +1,29 @@
-import React, {useState, useEffect} from 'react';
-import {View, Text, StyleSheet, Switch, Alert} from 'react-native';
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import React, { useState, useEffect, useRef } from 'react';
+import { View, Text, StyleSheet, Switch, Alert } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
+// Custom useUpdate hook
+// Runs when dependencies update, but skips the initial mount
+const useUpdate = (callback, dependencies) => {
+    const firstRender = useRef(true);
+
+    useEffect(() => {
+        if (firstRender.current) {
+            firstRender.current = false;
+            return;
+        }
+
+        callback();
+    }, dependencies);
+};
 
 const AccountScreen = () => {
     // STATES
-    const [push, setPush] = useState(false);
-    const [marketing, setMarketing] = useState(false);
-    const [news, setNews] = useState(false);
+    const [preferences, setPreferences] = useState({
+        pushNotifications: false,
+        emailNotifications: false,
+        smsNotifications: false,
+    });
 
     // LOAD SAVED PREFERENCES
     useEffect(() => {
@@ -32,113 +48,128 @@ const AccountScreen = () => {
                     );
                 }
 
-                console.log('Loaded preferences', values);
+                console.log('Loaded preferences:', values);
+
+                const loadedPreferences = {};
 
                 values.forEach(([key, value]) => {
                     if (value !== null) {
-                        const parsedValue = JSON.parse(value);
-
-                        if (key === 'pushNotifications') {
-                            setPush(parsedValue);
-                        }
-
-                        if (key === 'emailNotifications') {
-                            setMarketing(parsedValue);
-                        }
-
-                        if (key === 'smsNotifications') {
-                            setNews(parsedValue);
-                        }
+                        loadedPreferences[key] = value === 'true';
                     }
                 });
+
+                setPreferences((currentPreferences) => ({
+                    ...currentPreferences,
+                    ...loadedPreferences,
+                }));
             } catch (e) {
                 Alert.alert('Error', e.message);
                 console.log(`Error: ${e}`);
             }
-        }
+        };
 
         loadPreferences();
     }, []);
 
-
     // PERSISTENT ASYNC STORAGE
-
-    const updatePreferences = async (userPreferences) => {
-        try {
-            const pairs = [
-                ['pushNotifications', JSON.stringify(userPreferences.push)],
-                ['emailNotifications', JSON.stringify(userPreferences.marketing)],
-                ['smsNotifications', JSON.stringify(userPreferences.news)],
-            ];
-
-            // Text platform (mobile or web)
-            if (AsyncStorage.multiSet) {
-                await AsyncStorage.multiSet(pairs);
-            } else {
-                await Promise.all(
-                    pairs.map(([key, value]) => AsyncStorage.setItem(key, value))
+    // This effect only runs when the preferences state updates,
+    // excluding initial mount
+    useUpdate(() => {
+        const savePreferences = async () => {
+            try {
+                const keyValues = Object.entries(preferences).map(
+                    ([key, value]) => [key, String(value)]
                 );
+
+                if (AsyncStorage.multiSet) {
+                    await AsyncStorage.multiSet(keyValues);
+                } else {
+                    await Promise.all(
+                        keyValues.map(([key, value]) =>
+                            AsyncStorage.setItem(key, value)
+                        )
+                    );
+                }
+
+                // Debugging
+                let result;
+
+                if (AsyncStorage.multiGet) {
+                    result = await AsyncStorage.multiGet([
+                        'pushNotifications',
+                        'emailNotifications',
+                        'smsNotifications',
+                    ]);
+                } else {
+                    result = await Promise.all(
+                        keyValues.map(async ([key]) => [
+                            key,
+                            await AsyncStorage.getItem(key),
+                        ])
+                    );
+                }
+
+                console.log('Saved preferences:', result);
+            } catch (e) {
+                Alert.alert(`An error occurred: ${e.message}`);
+                console.log(`Error: ${e}`);
             }
+        };
 
-
-            // Debugging
-            let result;
-
-            if (AsyncStorage.multiGet) {
-                result = await AsyncStorage.multiGet([
-                    'pushNotifications',
-                    'emailNotifications',
-                    'smsNotifications',
-                ]);
-            } else {
-                result = await Promise.all(
-                    pairs.map(async ([key]) => [
-                        key,
-                        await AsyncStorage.getItem(key),
-                    ])
-                );
-            }
-
-            console.log(result);
-        } catch (e) {
-            Alert.alert(`An error occurred: ${e.message}`);
-            console.log(`Error: ${e}`);
-        }
-    }
+        savePreferences();
+    }, [preferences]);
 
     const handlePushChange = (value) => {
-        setPush(value);
-        updatePreferences({ push: value, marketing, news})
-    }
+        setPreferences((currentPreferences) => ({
+            ...currentPreferences,
+            pushNotifications: value,
+        }));
+    };
 
     const handleMarketingChange = (value) => {
-        setMarketing(value);
-        updatePreferences({push, marketing: value, news})
-    }
+        setPreferences((currentPreferences) => ({
+            ...currentPreferences,
+            emailNotifications: value,
+        }));
+    };
 
     const handleNewsChange = (value) => {
-        setNews(value);
-        updatePreferences({push, marketing, news: value})
-    }
+        setPreferences((currentPreferences) => ({
+            ...currentPreferences,
+            smsNotifications: value,
+        }));
+    };
 
     // RETURNED SCREEN
     return (
         <View style={styles.container}>
             <Text style={styles.header}>Account Preferences</Text>
+
             <View style={styles.settingCard}>
                 <Text style={styles.settingText}>Push notifications</Text>
-                <Switch value={push} onValueChange={handlePushChange} />
+                <Switch
+                    value={preferences.pushNotifications}
+                    onValueChange={handlePushChange}
+                />
             </View>
+
             <View style={styles.settingCard}>
                 <Text style={styles.settingText}>Marketing emails</Text>
-                <Switch value={marketing} onValueChange={handleMarketingChange} />
+                <Switch
+                    value={preferences.emailNotifications}
+                    onValueChange={handleMarketingChange}
+                />
             </View>
+
             <View style={styles.settingCard}>
                 <Text style={styles.settingText}>Latest news</Text>
-                <Switch value={news} onValueChange={handleNewsChange} />
+                <Switch
+                    value={preferences.smsNotifications}
+                    onValueChange={handleNewsChange}
+                />
             </View>
         </View>
-    )
+    );
 };
 
 const styles = StyleSheet.create({
@@ -156,13 +187,12 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
         padding: 8,
-        margin: 16
+        margin: 16,
     },
     settingText: {
         fontSize: 24,
         alignItems: 'center',
-    }
+    },
 });
-
 
 export default AccountScreen;
