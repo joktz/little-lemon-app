@@ -16,6 +16,9 @@ const WelcomeScreen = ({ navigation }) => {
         <Pressable style={styles.button} onPress={() => navigation.navigate('Account')}>
           <Text style={styles.buttonText}>Account</Text>
         </Pressable>
+        <Pressable style={styles.button} onPress={() => navigation.navigate('Customers')}>
+          <Text style={styles.buttonText}>Customers</Text>
+        </Pressable>
       </View>
     </View>
   )
