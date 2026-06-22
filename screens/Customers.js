@@ -4,10 +4,14 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 
 
-
 const CustomerScreen = () => {
     const [customer, onChangeCustomer] = React.useState('');
     const [customers, setCustomers] = React.useState([]);
+
+    // Update logging on customer list change
+    useEffect(() => {
+        console.log('Customer array updated', customers);
+    }, [customers]);
 
     // Customer adding code
     const onSave = () => {
@@ -24,10 +28,10 @@ const CustomerScreen = () => {
         const newCustomer = {
             id: id,
             name: customer
-        }
-        customers.push(newCustomer);
-        onChangeCustomer('')
-        console.log('Updated customers array:', customers)
+        };
+
+        setCustomers([...customers, newCustomer]);
+        onChangeCustomer('');
     };
 
     return (
@@ -47,10 +51,10 @@ const CustomerScreen = () => {
                     <Text style={styles.listText}>Customers:</Text>
                     <FlatList
                         data={customers}
-                        keyExtractor={(customer) => customer.id}
-                        renderItem={({ customer }) => (
+                        keyExtractor={(item) => item.id.toString()}
+                        renderItem={({ item }) => (
                             <View style={styles.customerCard}>
-                                <Text style={styles.listText}></Text>
+                                <Text style={styles.listText}> {item.name} </Text>
                             </View>
                         )}
                     />
@@ -97,7 +101,8 @@ const styles = StyleSheet.create({
         fontSize: 16,
     },
     customerCard: {
-
+        margin: 4,
+        marginLeft: -4,
     }
 })
 
