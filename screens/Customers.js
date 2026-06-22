@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, Switch, Alert, KeyboardAvoidingView, ScrollView, Pressable, TextInput, FlatList } from 'react-native';
+import { View, Text, StyleSheet, Switch, Alert, KeyboardAvoidingView, ScrollView, Pressable, TextInput, FlatList, Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { MaterialIcons } from '@expo/vector-icons';
 
@@ -55,9 +55,35 @@ const CustomerScreen = () => {
     }
 
     const deleteCustomer = (id) => {
+        if (Platform.OS == 'web') {
+            const confirmed = window.confirm(
+                'Are you sure you want to delete this customer?'
+            );
+
+            if (confirmed) {
+                setCustomers(customers.filter(customer => customer.id !== id));
+            }
+        } else {
+            Alert.alert(
+                'Delete Customer',
+                'Are you sure you want to delete this customer?',
+                [
+                    {
+                        text: 'Cancel',
+                        style: 'cancel',
+                    },
+                    {
+                        text: 'Delete',
+                        style: 'destructive',
+                        onPress: () => {
+                            setCustomers(customers.filter(customer => customer.id !== id));
+                        },
+                    },
+                ]
+            );
+        };
+
         console.log('Deleting customer:', id);
-        const updatedCustomers = customers.filter(customer => customer.id !== id);
-        setCustomers(updatedCustomers);
     }
 
     return (
