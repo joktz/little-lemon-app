@@ -1,9 +1,34 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, Switch, Alert, KeyboardAvoidingView, ScrollView, Pressable, TextInput } from 'react-native';
+import { View, Text, StyleSheet, Switch, Alert, KeyboardAvoidingView, ScrollView, Pressable, TextInput, FlatList } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+
+
+
 
 const CustomerScreen = () => {
     const [customer, onChangeCustomer] = React.useState('');
+    const [customers, setCustomers] = React.useState([]);
+
+    // Customer adding code
+    const onSave = () => {
+        console.log('Saving customer...');
+
+        //DEBUG: Check current date
+        console.log('Customers array:', customers);
+        console.log('Input:', customer);
+
+        // Iterate ID (TEMPORARY)
+        const id = customers.length + 1
+        console.log('Id to set:', id)
+
+        const newCustomer = {
+            id: id,
+            name: customer
+        }
+        customers.push(newCustomer);
+        onChangeCustomer('')
+        console.log('Updated customers array:', customers)
+    };
 
     return (
         <KeyboardAvoidingView>
@@ -15,11 +40,20 @@ const CustomerScreen = () => {
                     placeholder={'Enter the customer name'}
                     style={styles.input}
                 />
-                <Pressable style={styles.button}>
+                <Pressable style={styles.button} onPress={() => onSave()}>
                     <Text style={styles.buttonText}>Save Customer</Text>
                 </Pressable>
                 <View style={styles.customerList}>
                     <Text style={styles.listText}>Customers:</Text>
+                    <FlatList
+                        data={customers}
+                        keyExtractor={(customer) => customer.id}
+                        renderItem={({ customer }) => (
+                            <View style={styles.customerCard}>
+                                <Text style={styles.listText}></Text>
+                            </View>
+                        )}
+                    />
                 </View>
             </ScrollView>
         </KeyboardAvoidingView>
@@ -54,13 +88,16 @@ const styles = StyleSheet.create({
     },
     buttonText: {
         color: 'white',
-        fontSize: '16',
+        fontSize: 16,
     },
     customerList: {
         margin: 8,
     },
     listText: {
         fontSize: 16,
+    },
+    customerCard: {
+
     }
 })
 
