@@ -8,6 +8,8 @@ import { MaterialIcons } from '@expo/vector-icons';
 const CustomerScreen = () => {
     const [customer, onChangeCustomer] = React.useState('');
     const [customers, setCustomers] = React.useState([]);
+    const [editingId, setEditingId] = React.useState(null);
+    const [editText, setEditText] = React.useState('');
 
     // Update logging on customer list change
     useEffect(() => {
@@ -36,8 +38,20 @@ const CustomerScreen = () => {
     };
 
     // Customer edit & delete code
-    const editCustomer = (id) => {
+    const editCustomer = (item) => {
         console.log('Editing customer...');
+        // set editing id to open text input on card
+        setEditingId(item.id);
+        setEditText(item.name);
+    }
+
+    const saveEdit = () => {
+        console.log('Saving edit...');
+
+        const updatedCustomers = customers.map(customer => customer.id === editingId ? {...customer, name: editText } : customer );
+        setCustomers(updatedCustomers);
+        setEditingId(null);
+        setEditText('');
     }
 
     const deleteCustomer = (id) => {
@@ -53,6 +67,7 @@ const CustomerScreen = () => {
                     onChangeText={onChangeCustomer}
                     placeholder={'Enter the customer name'}
                     style={styles.input}
+                    onSubmitEditing={onSave}
                 />
                 <Pressable style={styles.button} onPress={() => onSave()}>
                     <Text style={styles.buttonText}>Save Customer</Text>
@@ -64,11 +79,29 @@ const CustomerScreen = () => {
                         keyExtractor={(item) => item.id.toString()}
                         renderItem={({ item }) => (
                             <View style={styles.customerCard}>
-                                <Text style={styles.listText}> {item.name} </Text>
+                                {editingId === item.id ? (
+                                    <TextInput
+                                        value={editText}
+                                        onChangeText={setEditText}
+                                        placeholder={'Enter the customer name'}
+                                        style={styles.editInput}
+                                        onSubmitEditing={saveEdit}
+                                    />
+                                ) : (
+                                    <Text style={styles.listText}> {item.name} </Text>
+                                )}
                                 <View style={styles.iconContainer}>
-                                    <Pressable onPress={() => editCustomer(item.id)}>
-                                        <MaterialIcons name="edit" size={24} color="black" />
-                                    </Pressable>
+                                    {editingId == item.id ? (
+                                            <Pressable onPress={saveEdit}>
+                                                <MaterialIcons name="edit" size={24} color="black" />
+                                            </Pressable>
+                                        ) : (
+                                            <Pressable onPress={() => editCustomer(item)}>
+                                                <MaterialIcons name="edit" size={24} color="black" />
+                                            </Pressable> 
+                                        )
+                                    }
+                                    
 
                                     <Pressable onPress={() => deleteCustomer(item.id)}>
                                         <MaterialIcons name="delete" size={24} color="black" />
@@ -121,12 +154,19 @@ const styles = StyleSheet.create({
     },
     customerCard: {
         margin: 4,
-        marginLeft: -4,
         flexDirection: 'row',
         justifyContent: 'space-between',
+        alignItems: 'center',
     },
     iconContainer: {
         flexDirection: 'row',
+    },
+    editInput: {
+        height: 40,
+        borderColor: 'green',
+        borderWidth: 1,
+        padding: 8,
+        textAlign: 'center',
     }
 })
 
