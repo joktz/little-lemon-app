@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, Switch, Alert, KeyboardAvoidingView, ScrollView, Pressable, TextInput, FlatList } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { MaterialIcons } from '@expo/vector-icons';
 
 
 
@@ -34,6 +35,15 @@ const CustomerScreen = () => {
         onChangeCustomer('');
     };
 
+    // Customer edit & delete code
+    const editCustomer = (id) => {
+        console.log('Editing customer...');
+    }
+
+    const deleteCustomer = (id) => {
+        console.log('Deleting customer...');
+    }
+
     return (
         <KeyboardAvoidingView>
             <ScrollView style={styles.container}>
@@ -55,6 +65,15 @@ const CustomerScreen = () => {
                         renderItem={({ item }) => (
                             <View style={styles.customerCard}>
                                 <Text style={styles.listText}> {item.name} </Text>
+                                <View style={styles.iconContainer}>
+                                    <Pressable onPress={() => editCustomer(item.id)}>
+                                        <MaterialIcons name="edit" size={24} color="black" />
+                                    </Pressable>
+
+                                    <Pressable onPress={() => deleteCustomer(item.id)}>
+                                        <MaterialIcons name="delete" size={24} color="black" />
+                                    </Pressable>
+                                </View>
                             </View>
                         )}
                     />
@@ -103,6 +122,11 @@ const styles = StyleSheet.create({
     customerCard: {
         margin: 4,
         marginLeft: -4,
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+    },
+    iconContainer: {
+        flexDirection: 'row',
     }
 })
 
