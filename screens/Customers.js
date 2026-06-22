@@ -55,7 +55,9 @@ const CustomerScreen = () => {
     }
 
     const deleteCustomer = (id) => {
-        console.log('Deleting customer...');
+        console.log('Deleting customer:', id);
+        const updatedCustomers = customers.filter(customer => customer.id !== id);
+        setCustomers(updatedCustomers);
     }
 
     return (
