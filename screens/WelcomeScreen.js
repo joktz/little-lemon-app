@@ -2,7 +2,6 @@ import * as React from 'react';
 import { View, Text, Image, StyleSheet, Pressable } from 'react-native';
 
 const WelcomeScreen = ({ navigation }) => {
-  // Add welcome screen code here.
   return (
     <View style={styles.container}>
       <Image source={require('../assets/little-lemon-logo.png')} style={styles.image} />
@@ -13,6 +12,12 @@ const WelcomeScreen = ({ navigation }) => {
         </Pressable>
         <Pressable style={styles.button} onPress={() => navigation.navigate('Menu')}>
           <Text style={styles.buttonText}>See Menu</Text>
+        </Pressable>
+        <Pressable style={styles.button} onPress={() => navigation.navigate('Account')}>
+          <Text style={styles.buttonText}>Account</Text>
+        </Pressable>
+        <Pressable style={styles.button} onPress={() => navigation.navigate('Customers')}>
+          <Text style={styles.buttonText}>Customers</Text>
         </Pressable>
       </View>
     </View>

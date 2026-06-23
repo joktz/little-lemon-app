@@ -24,10 +24,20 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#FFFFFF"
-      }
+      },
+      "package": "com.joktz.littleLemon"
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "extra": {
+      "eas": {
+        "projectId": "ca92834e-c711-4490-ae71-d82bd1086f33"
+      }
+    },
+    "plugins": [
+      "expo-status-bar",
+      "expo-sqlite"
+    ]
   }
 }
